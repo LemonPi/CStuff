@@ -3,28 +3,9 @@
 #include <string>
 #include <sstream>
 #include <cstdio>
+#include "node.h"
 
-struct Node {
-	using value_type = int;
-
-	Node* next {nullptr};
-	int data;
-
-	Node(value_type val) : data{val} {}
-
-	Node* insert(value_type val) {
-		Node* next = new Node{val};
-		return next;
-	}
-
-	Node* append(value_type val) {
-		Node* end = new Node{val};
-		Node* insert_at = this;
-		while (insert_at->next) insert_at = insert_at->next;
-		insert_at->next = end;
-	}
-
-};
+using Node = Linked_node;
 
 std::ostream& operator<<(std::ostream& os, Node* head) {
 	while (head) {
