@@ -148,25 +148,25 @@ void sum_print(Node* root, int sum_tot, int sum_left) {
 template <typename Node>
 bool sum_tree(Node* root, int sum_tot, int sum_left) {
 	if (!root) return false;	// unfinished sum
+	bool sum_found {false};
+	// don't stop after finding the value (sum_left == 0) since there could be negative vals
 	if (sum_left == root->data) {
 		sum_print(root, sum_tot, sum_left);
-		return true;
+		sum_found = true;
 	}
-	if (sum_left > root->data &&
-		(sum_tree(root->left, sum_tot, sum_left - root->data) ||
-		 sum_tree(root->right, sum_tot, sum_left - root->data))) {
+	if (sum_tree(root->left, sum_tot, sum_left - root->data) ||
+		 sum_tree(root->right, sum_tot, sum_left - root->data)) {
 		sum_print(root, sum_tot, sum_left);
-		return true;
+		sum_found = true;
 	}
-	// either data larger than sum_left (bust) or subtree sum failed
-	return false;
+	return sum_found;
 }
 template <typename Node>
 bool sum_tree(Node* root, int sum_tot) {
 	// initial calls made without 3rd argument will start at sum_tot
 	return sum_tree(root, sum_tot, sum_tot);
 }
-// O(n^2) time O(1) space
+// O(n lgn) time (turns out each sum attempt takes only lgn time) O(1) space
 template <typename Node>
 void sum_tree_all(Node* root, int sum_tot) {
 	// try summing to sum_tot from every node in order
