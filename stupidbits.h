@@ -1,9 +1,19 @@
+#pragma once
 #include <iostream>
 #include <bitset>
 #include <string>
 #include <climits>	// CHAR_BIT
 #include <sstream>
+#include <stdexcept>
 
+#ifndef GETINPUT
+#define GETINPUT() \
+	std::string line;\
+	std::getline(std::cin, line);\
+	std::stringstream ss {line};
+#endif
+
+using bit_rep = unsigned long long;
 // substitute M in bits i (low) to j (high) inclusively of N
 using b32 = uint32_t;
 b32 substitute_bits(b32 N, b32 M, size_t i, size_t j) {
@@ -39,7 +49,7 @@ std::string dec_to_bin(const std::string& num) {
 	int int_part;
 	converter >> int_part;
 	// using bitset takes care of integer sign 
-	std::bitset<32> int_bits {int_part};
+	std::bitset<32> int_bits {(bit_rep)int_part};
 	// no decimal part following
 	if (decimal_index == num.size()) return int_bits.to_string();
 
@@ -113,6 +123,47 @@ std::pair<T,T> neighbour_values(const T& num) {
 	return {next_smallest, next_largest};
 }
 
+int bitops_to_convert(int a, int b) {
+	std::bitset<sizeof(int) * CHAR_BIT> difference {(bit_rep)(a ^ b)};
+	return difference.count();
+}
+
+// assuming 32 bit int
+constexpr int odd_mask 	= 0xAAAA;	// 1010 1010 1010 1010
+constexpr int even_mask = 0x5555;	// 0101 0101 0101 0101
+int swap_parity_bits(int num) {
+	return ((num & odd_mask) >> 1) | ((num & even_mask) << 1);
+}
+
+template <typename bigint>	// big enough that only 1 bit can be accessed at a time
+bigint find_missing(std::vector<bigint> nums) { 	// pass by copy as it will be locally used
+	// use elimination with each bit filtering out half of the candidates for O(n) time
+	bigint missing {0};
+	for (size_t bit = 0; bit < sizeof(bigint)*CHAR_BIT; ++bit) {
+		for (auto num : nums) std::cout << num << ' ';
+		std::cout << '\n';
+		if (nums.size() <= 1) break;
+		// relative to the current bit
+		std::vector<bigint> evens, odds;
+		for (const bigint& num : nums) {
+			if (num & (1 << bit)) odds.push_back(num);
+			else evens.push_back(num);
+		}
+		// assuming nums is 0..n, #0s >= #1s since starting with 0
+		// if 0s > 1s then removing a even number -> 0s == 1s, else 0s < 1s
+		if (evens.size() <= odds.size()) {
+			nums = std::move(evens);
+		}
+		else {
+			nums = std::move(odds);
+			missing |= 1 << bit;
+		}
+	}
+	
+	// if (nums.size() != 1) throw std::runtime_error("More than 1 missing from 0 to n");
+	return missing;
+}
+
 void test_dec_to_bin() {
 	std::string line;
 	std::getline(std::cin, line);
@@ -121,18 +172,40 @@ void test_dec_to_bin() {
 }
 
 void test_neighbour_values() {
-	std::string line;
-	std::getline(std::cin, line);
-	std::stringstream ss {line};
+	GETINPUT();
 	int num; ss >> num;
 	auto neighbours = neighbour_values(num);
-	std::bitset<32> original {num};
-	std::bitset<32> s {neighbours.first};
-	std::bitset<32> l {neighbours.second};
+	std::bitset<32> original {(bit_rep)num};
+	std::bitset<32> s {(bit_rep)neighbours.first};
+	std::bitset<32> l {(bit_rep)neighbours.second};
 	std::cout << original << " (" << num << ")\n";
 	std::cout << s << " (" << neighbours.first << ")\n";
 	std::cout << l << " (" << neighbours.second << ")\n";
 	if (__builtin_popcount(num) != __builtin_popcount(neighbours.first) ||
 		__builtin_popcount(num) != __builtin_popcount(neighbours.second))
 		std::cout << "Neightbour values ... FAILED\n";
+}
+
+void test_bitops_to_convert() {
+	GETINPUT();
+	int a, b;
+	ss >> a >> b;
+	std::cout << bitops_to_convert(a, b) << std::endl;
+}
+
+void test_swap_parity_bits() {
+	GETINPUT();
+	int num;
+	ss >> num;
+	std::cout << std::bitset<32> {(bit_rep)num} << std::endl;
+	std::cout << std::bitset<32> {(bit_rep)swap_parity_bits(num)} << std::endl;
+}
+
+void test_find_missing() {
+	std::vector<int> nums;
+	GETINPUT();
+	int num;
+	while (ss >> num) nums.push_back(num);
+	int missing {find_missing(nums)};
+	std::cout << missing << std::endl;
 }
