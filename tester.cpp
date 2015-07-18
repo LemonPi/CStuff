@@ -1,10 +1,34 @@
 #include <iostream>
+#include <vector>
 // #include "stupidstack.h"
 // #include "stupidqueue.h"
 // #include "stupidgraph.h"
 // #include "stupidbits.h"
 // #include "stupidoop.h"
 #include "stupidrecursion.h"
+
+using std::cout;
+class Obj {
+public:
+	Obj() 			{cout << "default constructor\n";}
+	Obj(const Obj&) {cout << "copy constructor\n";}
+	Obj(Obj&&) 		{cout << "move constructor\n";}
+	~Obj()			{cout << "destructor\n";}
+};
+
+void test_ownership() {
+	std::vector<Obj> objs;
+	objs.reserve(10);
+	
+	Obj l_value_obj;
+	Obj l_value_obj_2;
+	std::cout << "Emplacement ---------------------------\n";
+	objs.emplace_back(std::move(l_value_obj));
+	std::cout << "Emplacement without move --------------\n";
+	objs.emplace_back(l_value_obj_2);
+	std::cout << "Pushback without move -----------------\n";
+	objs.push_back(l_value_obj_2);
+}
 
 int main() {
 	// test_min_stack();
@@ -24,9 +48,6 @@ int main() {
 	// test_cards();
 	// test_callcenter();
 	// test_library();
-	// test_fibonacci();
-	// test_path_ways();
-	// test_all_subsets();
-	// test_all_perms();
-	test_paren_pairs();
+	test_recursion();
+	// test_ownership();
 }

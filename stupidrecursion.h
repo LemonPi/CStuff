@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <set>
 #include <iterator>
+#include <algorithm>
 #include "sal/algo/numeric.h"	// choose
 
 #ifndef GETINPUT
@@ -178,7 +179,7 @@ struct all_perms_wrapper {
 	static vector<vector<T>> all_perms(Iter begin, Iter end) {
 		if (begin == end) return {};
 		if (std::distance(begin, end) == 1) return {vector<T>{*begin}};
-		int perm_len {std::distance(begin, end)};
+		int perm_len {(int)std::distance(begin, end)};
 		// else permute every following element
 		T leading_elem {*begin};
 		auto remaining_perms = all_perms(++begin, end);
@@ -237,6 +238,79 @@ vector<std::string> combine_paren(size_t paren_pairs) {
 	return parens;
 }
 
+
+
+template <typename Color>
+void paint(vector<vector<Color>>& screen, Color orig, Color new_col, size_t x, size_t y) {
+	// make sure screen has 1px border to prevent going out of bounds
+	if (screen[x][y] != orig) return;
+	screen[x][y] = new_col;
+	// spill to neighbours
+	paint(screen,orig,new_col,x,y+1);
+	paint(screen,orig,new_col,x,y-1);
+	paint(screen,orig,new_col,x-1,y);
+	paint(screen,orig,new_col,x+1,y);
+}
+// user calls this (unless they specify original color)
+template <typename Color>
+void paint(vector<vector<Color>>& screen, Color new_col, size_t x, size_t y) {
+	paint(screen, screen[x][y], new_col, x, y);
+}
+
+
+// count number of ways to generate sum using num_vals elements from vals
+template <typename T>
+size_t count_combos(const vector<T>& vals, T sum) {
+    // create table to avoid recomputation of same subproblem
+    // table stores # of solutions for certain sum (as index)
+    vector<int> table(sum+1, 0);
+
+    table[0] = 1;   // base case of 1 solution
+
+    for (const T& value_unit : vals) {
+    	// std::cout << value_unit << ": ";
+        for (T val = value_unit; val <= sum; ++val) {
+        	// std::cout << table[val - value_unit] << ' ';
+            table[val] += table[val - value_unit];
+        }
+        // std::cout << std::endl;
+    }
+
+    return table[sum];
+}
+
+bool check_diagonal_attacks(const vector<int>& cols, int row) {
+	for (int r = 0; r < row; ++r) {
+		int diff {std::abs(cols[r] - cols[row])};
+		// difference in col would equal difference in row for diagonal
+		if (diff == row - r) return true;
+	}
+	return false;	// no attacks
+}
+vector<vector<std::pair<int,int>>> n_queens(size_t n) {
+	vector<vector<std::pair<int,int>>> sols;
+	// n is size of column and row
+	// restrict each queen to a row, and constrain game to column permutation with unique indices
+	vector<int> cols; cols.reserve(n);
+	// start with the first permutation of columns {0,1,2,3..n}
+	for (int c = 0; c < n; ++c) cols.push_back(c);
+
+	// n! number of permutations
+	while (std::next_permutation(cols.begin(), cols.end())) {
+		// check for diagonal attacks
+		int conflict {0};
+		for (int q = 0; q < n; ++q)
+			conflict |= check_diagonal_attacks(cols, q);
+
+		if (!conflict) {
+			vector<std::pair<int,int>> sol;
+			for (int q = 0; q < n; ++q) sol.emplace_back(q, cols[q]);
+			sols.emplace_back(std::move(sol));
+		}
+	}
+	return sols;
+}
+
 void test_fibonacci() {
 	GETINPUT();
 	size_t n;
@@ -248,7 +322,7 @@ void test_fibonacci() {
 
 void test_path_ways() {
 	GETINPUT();
-	size_t row, col;
+	int row, col;
 	ss >> row >> col;
 	std::unordered_set<int> no_go {
 		3*col + 2,
@@ -296,4 +370,36 @@ void test_paren_pairs() {
 	auto pair_combos = combine_paren(paren_pairs);
 	for (const auto& combo : pair_combos)
 		std::cout << combo << std::endl;
+}
+
+void test_count_combos() {
+	vector<int> coins {1, 5, 10, 25};
+	GETINPUT();
+	int n_cents;
+	ss >> n_cents;
+	std::cout << count_combos(coins, n_cents) << std::endl;
+}
+
+void test_n_queens() {
+	GETINPUT();
+	size_t n;
+	ss >> n;
+	auto sols = n_queens(n);
+	for (const auto& sol : sols) {
+		for (const auto& coordinate : sol) {
+			std::cout << '(' << coordinate.first << ',' << coordinate.second << ") ";
+		} 
+		std::cout << std::endl;
+	}
+	std::cout << sols.size() << std::endl;
+}
+
+void test_recursion() {
+	// test_fibonacci();
+	// test_path_ways();
+	// test_all_subsets();
+	// test_all_perms();
+	// test_paren_pairs();
+	// test_count_combos();	
+	test_n_queens();
 }
