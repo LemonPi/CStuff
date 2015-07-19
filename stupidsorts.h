@@ -69,7 +69,7 @@ struct Number_bucket_hash {
 	}
 };
 
-
+// merge b into a assuming it has enough space
 template <typename Indexable>
 void merge_into(Indexable&& a, Indexable&& b, size_t a_size) {
 	// sorted arrays with enough of a buffer behind a (after a_size elements)
@@ -100,6 +100,7 @@ void anagram_sort(Iter begin, const Iter end) {
 	std::sort(begin, end, Anagram_comp{});
 }
 
+// binary search on a rotated sorted sequence
 template <typename Iter>
 Iter rotated_find(Iter begin, const Iter end, const typename std::iterator_traits<Iter>::value_type& key) {
 	int l = 0, u = std::distance(begin, end) - 1;
@@ -162,6 +163,57 @@ std::pair<int,int> matrix_search(const Mat2D& mat, const T& key) {
 	return {-1, -1};
 }
 
+struct Circus_person {
+	int ht, wt;
+};
+
+// tower is a sequence of Circus_person where each previous person must have ht and wt both <
+template <typename Indexable>
+std::vector<Circus_person> make_circus_tower(Indexable&& ppl) {
+	// sort by height and weight on 2 passes
+	std::sort(ppl.begin(), ppl.end(), [](const Circus_person& a, const Circus_person& b) {
+		return a.ht < b.ht; });	
+	std::stable_sort(ppl.begin(), ppl.end(), [](const Circus_person& a, const Circus_person& b) {
+		return a.wt < b.wt; });
+
+	auto stackable = [&](size_t a, size_t b) {return ppl[a].ht < ppl[b].ht && ppl[a].wt < ppl[b].wt;};
+
+	size_t seq_start {0};
+	bool found_another_start {false};
+
+	for (const auto& cp : ppl) std::cout << '(' << cp.ht << ',' << cp.wt << ") ";
+	std::cout << std::endl;
+
+	// indices
+	std::vector<size_t> tallest_tower;
+	while (seq_start < ppl.size()) {
+		std::cout << "starting sequence at " << seq_start << std::endl;
+		size_t last_stackable {seq_start};
+		std::vector<size_t> tower {seq_start};
+		for (size_t p = seq_start + 1; p < ppl.size(); ++p) {
+			if (stackable(last_stackable, p)) {
+				last_stackable = p;
+				tower.push_back(p);
+			}	
+			// the unstackable element becomes the next potential starting point
+			else if (!found_another_start) {
+				seq_start = p;
+				found_another_start = true;
+			}
+		}
+		if (tower.size() > tallest_tower.size()) tallest_tower = std::move(tower);
+		// reached the end without finding new starts
+		if (!found_another_start) break;
+		// reset for next sequence
+		else found_another_start = false;	
+	}
+
+	// convert indices to persons
+	std::vector<Circus_person> actual_tower;
+	for (size_t p : tallest_tower) actual_tower.push_back(ppl[p]);
+	return actual_tower;
+}
+
 void test_bucket_sort() {
 	GETINPUT();
 	std::vector<int> nums;
@@ -184,6 +236,7 @@ void test_merge_into() {
 	std::cout << std::endl;
 }
 
+// anagrams should be beside each other
 void test_anagram_sort() {
 	std::vector<std::string> strs {
 		"oldwestaction",
@@ -241,11 +294,22 @@ void test_matrix_search() {
 	std::cout << find.first << ' ' << find.second << std::endl;
 }
 
+void test_make_circus_tower() {
+	vector<Circus_person> ppl {
+		{65,100}, {70,150}, {56,90}, {75,190}, {60,95}, {68,110}
+	};
+	vector<Circus_person> tower {make_circus_tower(ppl)};
+	std::cout << tower.size() << ": ";
+	for (const auto& cp : tower) std::cout << '(' << cp.ht << ',' << cp.wt << ") ";
+	std::cout << std::endl;
+}
+
 void test_sorts() {
 	// test_bucket_sort();
 	// test_merge_into();
 	// test_anagram_sort();
 	// test_rotated_find();
 	// test_interspersed_search();
-	test_matrix_search();
+	// test_matrix_search();
+	test_make_circus_tower();
 }

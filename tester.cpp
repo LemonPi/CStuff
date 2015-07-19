@@ -6,7 +6,8 @@
 // #include "stupidbits.h"
 // #include "stupidoop.h"
 // #include "stupidrecursion.h"
-#include "stupidsorts.h"
+// #include "stupidsorts.h"
+#include "stupidmaths.h"
 
 using std::cout;
 class Obj {
@@ -41,5 +42,6 @@ int main() {
 	// test_oop();
 	// test_recursion();
 	// test_ownership();
-	test_sorts();
+	// test_sorts();
+	test_maths();
 }
