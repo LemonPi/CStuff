@@ -389,3 +389,9 @@ void test_library() {
 	mylib.add_book(b1);
 	mylib.add_book(b2);
 }
+
+void test_oop() {
+	// test_cards();
+	// test_callcenter();
+	// test_library();	
+}

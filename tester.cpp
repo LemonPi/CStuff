@@ -5,7 +5,8 @@
 // #include "stupidgraph.h"
 // #include "stupidbits.h"
 // #include "stupidoop.h"
-#include "stupidrecursion.h"
+// #include "stupidrecursion.h"
+#include "stupidsorts.h"
 
 using std::cout;
 class Obj {
@@ -19,7 +20,7 @@ public:
 void test_ownership() {
 	std::vector<Obj> objs;
 	objs.reserve(10);
-	
+
 	Obj l_value_obj;
 	Obj l_value_obj_2;
 	std::cout << "Emplacement ---------------------------\n";
@@ -35,19 +36,10 @@ int main() {
 	// test_stack_set();
 	// test_hanoi();
 	// test_stack_queue();
-	// test_binary_search_tree();
-	// test_static_graph();
-	// test_layer_nodes();
-	// test_first_common_ancestor();
-	// test_sum_tree();
-	// test_dec_to_bin();
-	// test_neighbour_values();
-	// test_bitops_to_convert();
-	// test_swap_parity_bits();
-	// test_find_missing();
-	// test_cards();
-	// test_callcenter();
-	// test_library();
-	test_recursion();
+	// test_graph();
+	// test_bits();
+	// test_oop();
+	// test_recursion();
 	// test_ownership();
+	test_sorts();
 }

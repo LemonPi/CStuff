@@ -404,3 +404,10 @@ void test_static_graph() {
 		std::cout << sink << " could not be reached from " << source << std::endl;
 }
 
+void test_graph() {
+	// test_binary_search_tree();
+	// test_static_graph();
+	// test_layer_nodes();
+	// test_first_common_ancestor();
+	// test_sum_tree();	
+}

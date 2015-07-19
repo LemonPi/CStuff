@@ -5,13 +5,8 @@
 #include <climits>	// CHAR_BIT
 #include <sstream>
 #include <stdexcept>
+#include "common.h"
 
-#ifndef GETINPUT
-#define GETINPUT() \
-	std::string line;\
-	std::getline(std::cin, line);\
-	std::stringstream ss {line};
-#endif
 
 using bit_rep = unsigned long long;
 // substitute M in bits i (low) to j (high) inclusively of N
@@ -208,4 +203,12 @@ void test_find_missing() {
 	while (ss >> num) nums.push_back(num);
 	int missing {find_missing(nums)};
 	std::cout << missing << std::endl;
+}
+
+void test_bits() {
+	// test_dec_to_bin();
+	// test_neighbour_values();
+	// test_bitops_to_convert();
+	// test_swap_parity_bits();
+	// test_find_missing();	
 }
