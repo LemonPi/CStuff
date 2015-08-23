@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+// #include "stupidlist.h"
 // #include "stupidstack.h"
 // #include "stupidqueue.h"
 // #include "stupidgraph.h"
@@ -7,32 +8,16 @@
 // #include "stupidoop.h"
 // #include "stupidrecursion.h"
 // #include "stupidsorts.h"
-#include "stupidmaths.h"
+// #include "stupidmaths.h"
+// #include "stupidknowledge.h"
+// #include "stupidheap.h"
+#include "misc.h"
+// #include "profiling.h"
 
 using std::cout;
-class Obj {
-public:
-	Obj() 			{cout << "default constructor\n";}
-	Obj(const Obj&) {cout << "copy constructor\n";}
-	Obj(Obj&&) 		{cout << "move constructor\n";}
-	~Obj()			{cout << "destructor\n";}
-};
-
-void test_ownership() {
-	std::vector<Obj> objs;
-	objs.reserve(10);
-
-	Obj l_value_obj;
-	Obj l_value_obj_2;
-	std::cout << "Emplacement ---------------------------\n";
-	objs.emplace_back(std::move(l_value_obj));
-	std::cout << "Emplacement without move --------------\n";
-	objs.emplace_back(l_value_obj_2);
-	std::cout << "Pushback without move -----------------\n";
-	objs.push_back(l_value_obj_2);
-}
 
 int main() {
+	// test_list();
 	// test_min_stack();
 	// test_stack_set();
 	// test_hanoi();
@@ -41,7 +26,10 @@ int main() {
 	// test_bits();
 	// test_oop();
 	// test_recursion();
-	// test_ownership();
 	// test_sorts();
-	test_maths();
+	// test_maths();
+	// test_knowledge();
+	// test_heap();
+	test_misc();
+	// run_profile();
 }

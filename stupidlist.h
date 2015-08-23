@@ -1,9 +1,13 @@
+#pragma once
 #include <unordered_set>
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <cstdio>
 #include "node.h"
+#include "common.h"
+
+namespace list {
 
 using Node = Linked_node;
 
@@ -217,6 +221,29 @@ Node* init_head() {
 	return head;	
 }
 
+Node* revlist(Node* head) {
+	// takes a head and returns the head of the reverse list (tail of original)
+	if (!head) return nullptr;
+	// prev always holds the cur the turn before, job is to be pointed at
+	Node* prev {new Node{head}};
+	if (!prev->next) return prev;
+	// cur is the newly created node, job is to create node copy and point at prev
+	Node* cur {new Node{prev->next}};
+	prev->next = nullptr;	// tail, can assign this at any point before becoming cur
+	// next is the node after cur, job is to advance and be created from by cur
+	Node* next {cur->next};
+	// point back after getting the next node
+	cur->next = prev;
+
+	while (next) {
+		prev = cur;	
+		cur = new Node{next};	// next is not null, so OK to create copy at this point
+		next = next->next;
+		cur->next = prev; // point back
+	}
+	return cur;
+}
+
 void test_nth() {
 	Node* head = init_head();
 
@@ -262,13 +289,23 @@ void test_loop() {
 		std::cout << "find loop start ... FAILED\n";
 	}
 	else {
-		std::cout << "fnid loop start ... OK\n";
+		std::cout << "find loop start ... OK\n";
 	}
 }
 
-int main() {
-	// test_nth();
-	// test_delete();
-	// test_add();
-	test_loop();
+void test_reverse() {
+	Node* head = init_head();
+	cout << "original: " << head;
+	cout << "reversed: " << revlist(head);
+}
+
+	
+}	// endnamespace list
+
+void test_list() {
+	// list::test_nth();
+	// list::test_delete();
+	// list::test_add();
+	// list::test_loop();
+	list::test_reverse();
 }

@@ -110,15 +110,7 @@ class Hanoi_towers {
 	std::vector<std::stack<int>> towers;
 	size_t game_size;
 	size_t moves_taken;
-public:
-	Hanoi_towers(size_t N) : towers(3), game_size{N}, moves_taken{0} {
-		for (int n = (int) N; n > 0; --n)
-			towers[0].push(n);
-	}
-	size_t solve() {
-		if (!moves_taken) move(0, 2, game_size);
-		return moves_taken;
-	}
+	
 	void move(size_t move_from, size_t move_to, size_t num_moved) {
 		std::cout << "Moving " << num_moved << " from " << move_from << " to " << move_to << '\n';
 		++moves_taken;
@@ -131,12 +123,24 @@ public:
 		// else need to use the other tower as temporary
 		// 0 + 1 + 2 = 3 can use sum to deduce the index of the other tower
 		size_t move_temp = 3 - move_to - move_from;
+		// temporarily move all top disks (leaving 1 bottom disk) to temporary
 		move(move_from, move_temp, num_moved - 1);
 		// the bottom disk
 		move(move_from, move_to, 1);
 		// move back top disks
 		move(move_temp, move_to, num_moved - 1);
 	}
+
+public:
+	Hanoi_towers(size_t N) : towers(3), game_size{N}, moves_taken{0} {
+		for (int n = (int) N; n > 0; --n)
+			towers[0].push(n);
+	}
+	size_t solve() {
+		if (!moves_taken) move(0, 2, game_size);
+		return moves_taken;
+	}
+
 
 	// destructively examine stacks
 	void examine() {

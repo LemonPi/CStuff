@@ -4,6 +4,8 @@
 #include <string>
 #include <climits>	// CHAR_BIT
 #include <sstream>
+#include <cstdlib>
+#include <iomanip>
 #include <stdexcept>
 #include "common.h"
 
@@ -46,7 +48,7 @@ std::string dec_to_bin(const std::string& num) {
 	// using bitset takes care of integer sign 
 	std::bitset<32> int_bits {(bit_rep)int_part};
 	// no decimal part following
-	if (decimal_index == num.size()) return int_bits.to_string();
+	if (decimal_index == (int)num.size()) return int_bits.to_string();
 
 	// clear converter
 	converter.clear();
@@ -159,6 +161,49 @@ bigint find_missing(std::vector<bigint> nums) { 	// pass by copy as it will be l
 	return missing;
 }
 
+
+// only for power of 2 bases
+template <typename T>
+T bit_round_down(const T& val, size_t base) {
+	// all higher bits are set and lower bits are cleared
+	return val & ~(base - 1);
+}
+
+// assuming alignment is a power of 2
+void* aligned_malloc(size_t size, size_t alignment) {
+	// % alignment can be [0,alignment-1] from the allocated location
+	// also need to a pointer space to store the actual allocated pointer
+	auto buffer_bytes = (alignment-1) + sizeof(void*);	
+	void* actual_alloc {malloc(size + buffer_bytes)};
+	if (!actual_alloc) return nullptr;
+	// round up to the nearest alignment
+	// adding buffer_bytes rounding down will be behind actual_alloc and have enough space for actual_alloc
+	void** aligned_alloc {reinterpret_cast<void**>(bit_round_down(reinterpret_cast<size_t>(actual_alloc) + buffer_bytes, alignment))};
+	aligned_alloc[-1] = actual_alloc;
+	return aligned_alloc;
+}
+
+void aligned_free(void* aligned_alloc) {
+	free(static_cast<void**>(aligned_alloc)[-1]);
+}
+
+template <typename T>
+class Multiarray {
+	T* elems;
+	size_t col_size;
+public:
+	Multiarray() : elems{nullptr} {}
+	Multiarray(size_t r, size_t c) : elems{new T[r*c]}, col_size{c} {}
+	~Multiarray() {if (elems) delete[] elems;}
+
+	T* operator[](size_t row) {return elems + row*col_size;}
+};
+
+template <typename T>
+Multiarray<T> my2DAlloc(size_t r, size_t c) {
+	return Multiarray<T>{r, c};
+}
+
 void test_dec_to_bin() {
 	std::string line;
 	std::getline(std::cin, line);
@@ -205,10 +250,41 @@ void test_find_missing() {
 	std::cout << missing << std::endl;
 }
 
+void test_aligned_malloc() {
+	GETINPUT();
+	size_t alignment;
+	ss >> alignment;
+
+	void* test = aligned_malloc(100, alignment);
+	cout << std::hex << alignment << ": " << test << endl;
+
+	aligned_free(test);
+}
+
+void test_multiarray() {
+	GETINPUT();
+	size_t row, col;
+	ss >> row >> col;
+	auto twod = my2DAlloc<int>(row, col);
+	// populate
+	for (size_t r = 0; r < row; ++r) 
+		for (size_t c = 0; c < col; ++c) 
+			twod[r][c] = r * c;
+
+	// read
+	for (size_t r = 0; r < row; ++r) {
+		for (size_t c = 0; c < col; ++c)
+			cout << std::setw(4) << twod[r][c] << ' ';
+		cout << endl;
+	}
+}
+
 void test_bits() {
 	// test_dec_to_bin();
 	// test_neighbour_values();
 	// test_bitops_to_convert();
 	// test_swap_parity_bits();
 	// test_find_missing();	
+	// test_aligned_malloc();
+	test_multiarray();
 }
